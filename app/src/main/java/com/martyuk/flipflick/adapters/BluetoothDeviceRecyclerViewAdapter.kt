@@ -2,6 +2,7 @@ package com.martyuk.flipflick.adapters
 
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,13 +10,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.martyuk.flipflick.BluetoothDeviceActivity
+import com.martyuk.flipflick.MainActivity
 import com.martyuk.flipflick.R
 import com.martyuk.flipflick.entities.BluetoothDeviceWithConnectionStatus
+import kotlinx.android.synthetic.main.item_bounded_device.view.*
 
 class HostRecyclerViewAdapter(
     private val mAllDevices: ArrayList<BluetoothDeviceWithConnectionStatus>,
 ) :
     RecyclerView.Adapter<HostRecyclerViewAdapter.ViewHolder>() {
+    private var mSelectedDevices: ArrayList<BluetoothDeviceWithConnectionStatus> = arrayListOf()
 
     inner class ViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         RecyclerView.ViewHolder(inflater.inflate(R.layout.item_bounded_device, parent, false)) {
@@ -47,15 +51,40 @@ class HostRecyclerViewAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentDevice = mAllDevices[position]
         holder.bind(currentDevice)
-        holder.itemView.setOnClickListener {
-            val intent = Intent(holder.itemView.context, BluetoothDeviceActivity::class.java)
-            intent.putExtra("macAddress", currentDevice.bluetoothDevice.address)
-            holder.itemView.context.startActivity(intent)
+        when (holder.itemView.context.javaClass) {
+            MainActivity::class.java -> {
+                holder.itemView.setOnClickListener {
+                    val intent =
+                        Intent(holder.itemView.context, BluetoothDeviceActivity::class.java)
+                    intent.putExtra("macAddress", currentDevice.bluetoothDevice.address)
+                    holder.itemView.context.startActivity(intent)
+                }
+            }
+            else -> {
+                // selection of items when connecting hosts
+                holder.itemView.apply {
+                    setOnClickListener {
+                        when (currentDevice in mSelectedDevices) {
+                            true -> {
+                                mSelectedDevices.remove(currentDevice)
+                                iv_slave_device_selected.visibility = View.GONE
+                            }
+                            false -> {
+                                mSelectedDevices.add(currentDevice)
+                                iv_slave_device_selected.visibility = View.VISIBLE
+                            }
+                        }
+                    }
+                }
+            }
         }
+
     }
 
 
     override fun getItemCount(): Int = mAllDevices.size
+
+    fun getSelectedDevices() = mSelectedDevices
 
 
 }
