@@ -1,24 +1,25 @@
 package com.martyuk.flipflick.adapters
 
-import android.bluetooth.BluetoothDevice
-import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
-import com.martyuk.flipflick.BluetoothDeviceActivity
+import com.martyuk.flipflick.BluetoothDeviceFragment
 import com.martyuk.flipflick.MainActivity
 import com.martyuk.flipflick.R
 import com.martyuk.flipflick.entities.BluetoothDeviceWithConnectionStatus
+import com.martyuk.flipflick.viewmodels.HostViewModel
 import kotlinx.android.synthetic.main.item_bounded_device.view.*
 
-class HostRecyclerViewAdapter(
+class BluetoothDeviceRecyclerViewAdapter(
+    private val mFragmentManager: FragmentManager,
     private val mAllDevices: ArrayList<BluetoothDeviceWithConnectionStatus>,
+    private val mHostViewModel: HostViewModel
 ) :
-    RecyclerView.Adapter<HostRecyclerViewAdapter.ViewHolder>() {
+    RecyclerView.Adapter<BluetoothDeviceRecyclerViewAdapter.ViewHolder>() {
     private var mSelectedDevices: ArrayList<BluetoothDeviceWithConnectionStatus> = arrayListOf()
 
     inner class ViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
@@ -54,10 +55,9 @@ class HostRecyclerViewAdapter(
         when (holder.itemView.context.javaClass) {
             MainActivity::class.java -> {
                 holder.itemView.setOnClickListener {
-                    val intent =
-                        Intent(holder.itemView.context, BluetoothDeviceActivity::class.java)
-                    intent.putExtra("macAddress", currentDevice.bluetoothDevice.address)
-                    holder.itemView.context.startActivity(intent)
+                    BluetoothDeviceFragment
+                        .newInstance(currentDevice.bluetoothDevice.address, mHostViewModel)
+                        .show(mFragmentManager, "asd")
                 }
             }
             else -> {
