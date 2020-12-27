@@ -7,7 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
-import com.martyuk.flipflick.BluetoothDeviceFragment
+import com.martyuk.flipflick.BluetoothDeviceDialogFragment
 import com.martyuk.flipflick.MainActivity
 import com.martyuk.flipflick.R
 import com.martyuk.flipflick.entities.BluetoothDeviceWithConnectionStatus
@@ -55,7 +55,7 @@ class BluetoothDeviceRecyclerViewAdapter(
         when (holder.itemView.context.javaClass) {
             MainActivity::class.java -> {
                 holder.itemView.setOnClickListener {
-                    BluetoothDeviceFragment
+                    BluetoothDeviceDialogFragment
                         .newInstance(currentDevice.bluetoothDevice.address, mHostViewModel)
                         .show(mFragmentManager, "asd")
                 }

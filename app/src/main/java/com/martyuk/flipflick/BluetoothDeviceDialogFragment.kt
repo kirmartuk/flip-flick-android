@@ -10,18 +10,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.martyuk.flipflick.BluetoothRepository.Companion.getBatteryLevel
 import com.martyuk.flipflick.adapters.HostRecyclerViewAdapter
+import com.martyuk.flipflick.viewmodels.HostViewModel
 import com.martyuk.flipflick.viewmodels.MainViewModel
 import kotlinx.android.synthetic.main.fragment_bluetooth_device.*
 
-class BluetoothDeviceActivity() : BottomSheetDialogFragment() {
+class BluetoothDeviceDialogFragment() : BottomSheetDialogFragment() {
     private val mainViewModel: MainViewModel by viewModels()
 
 
     companion object {
         var macAddress: String? = null
-        fun newInstance(macAddress: String): BluetoothDeviceActivity {
+        private var hostViewModel: HostViewModel? = null
+
+        fun newInstance(macAddress: String, hostViewModel: HostViewModel): BluetoothDeviceDialogFragment {
             this.macAddress = macAddress
-            return BluetoothDeviceActivity()
+            this.hostViewModel = hostViewModel
+            return BluetoothDeviceDialogFragment()
         }
     }
 
@@ -43,15 +47,13 @@ class BluetoothDeviceActivity() : BottomSheetDialogFragment() {
         pgb_bluetooth_device_battery.progress = bluetoothDevice.getBatteryLevel()
         tv_bluetooth_device_battery.text = "${bluetoothDevice.getBatteryLevel()}%"
 
-        mainViewModel.hostDevices.observe(this, {
+        hostViewModel?.hostDevices?.observe(this, {
             rv_host_devices.apply {
                 layoutManager = LinearLayoutManager(context)
                 adapter =
-                    HostRecyclerViewAdapter(it)
+                    HostRecyclerViewAdapter(it, bluetoothDevice)
             }
         })
-
-
     }
 
 }
