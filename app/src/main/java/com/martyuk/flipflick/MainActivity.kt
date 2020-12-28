@@ -23,7 +23,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val bluetoothRepository = BluetoothRepository(applicationContext)
         val filter = IntentFilter()
         val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             var device: BluetoothDevice? = null
@@ -38,13 +37,13 @@ class MainActivity : AppCompatActivity() {
                         // use post delay, because method
                         // loadConnectedDevices() can't get all connected devices in time
                         Handler().postDelayed({
-                            mainViewModel.loadSlaveDevices()
+                            mainViewModel.loadAllDevices()
                             mainViewModel.loadConnectedDevices()
                         }, 3500)
                     }
                     BluetoothDevice.ACTION_ACL_DISCONNECTED == action -> {
                         hostViewModel.updateHostDevice(device!!)
-                        mainViewModel.loadSlaveDevices()
+                        mainViewModel.loadAllDevices()
                         mainViewModel.loadConnectedDevices()
                     }
                     BluetoothRepository.UPDATE_HOSTS == action -> {
@@ -54,23 +53,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
-        mainViewModel.slaveDevices.observe(this, { allDevices ->
-            mainViewModel.connectedDevices.observe(this, { connectedDevices ->
-                rv_slave_devices.apply {
-                    layoutManager = LinearLayoutManager(context)
-                    (layoutManager as LinearLayoutManager).orientation =
-                        LinearLayoutManager.HORIZONTAL
-                    adapter = BluetoothDeviceRecyclerViewAdapter(
-                        supportFragmentManager,
-                        bluetoothRepository.mergeAllAndConnectedDevices(
-                            allDevices,
-                            connectedDevices
-                        ),
-                        hostViewModel
-                    )
-                }
-            })
+        mainViewModel.allDevices.observe(this, {
+            rv_slave_devices.apply {
+                layoutManager = LinearLayoutManager(context)
+                (layoutManager as LinearLayoutManager).orientation =
+                    LinearLayoutManager.HORIZONTAL
+                adapter = BluetoothDeviceRecyclerViewAdapter(
+                    supportFragmentManager,
+                    it,
+                    hostViewModel
+                )
+            }
         })
 
         hostViewModel.hostDevices.observe(this, {

@@ -11,6 +11,7 @@ import com.martyuk.flipflick.adapters.BluetoothDeviceRecyclerViewAdapter
 import com.martyuk.flipflick.entities.HostDeviceEntity
 import com.martyuk.flipflick.viewmodels.HostViewModel
 import com.martyuk.flipflick.viewmodels.MainViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_add_host_device.*
 
 class AddHostDeviceDialogFragment() : BottomSheetDialogFragment() {
@@ -34,25 +35,17 @@ class AddHostDeviceDialogFragment() : BottomSheetDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val bluetoothRepository = BluetoothRepository(requireContext())
-
-        mainViewModel.slaveDevices.observe(this, { allDevices ->
-            mainViewModel.connectedDevices.observe(this, { connectedDevices ->
-                rv_hosts.apply {
-                    layoutManager = LinearLayoutManager(context)
-                    (layoutManager as LinearLayoutManager).orientation =
-                        LinearLayoutManager.HORIZONTAL
-                    adapter = BluetoothDeviceRecyclerViewAdapter(
-                        activity?.supportFragmentManager!!,
-                        bluetoothRepository.mergeAllAndConnectedDevices(
-                            allDevices,
-                            connectedDevices
-                        ),
-                        mHostViewModel
-
-                    )
-                }
-            })
+        mainViewModel.allDevices.observe(this, {
+            rv_slave_devices.apply {
+                layoutManager = LinearLayoutManager(context)
+                (layoutManager as LinearLayoutManager).orientation =
+                    LinearLayoutManager.HORIZONTAL
+                adapter = BluetoothDeviceRecyclerViewAdapter(
+                    requireActivity().supportFragmentManager,
+                    it,
+                    mHostViewModel
+                )
+            }
         })
 
         btn_save_host_device.setOnClickListener {

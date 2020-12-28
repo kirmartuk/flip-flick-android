@@ -15,8 +15,6 @@ import com.martyuk.flipflick.viewmodels.MainViewModel
 import kotlinx.android.synthetic.main.fragment_bluetooth_device.*
 
 class BluetoothDeviceDialogFragment() : BottomSheetDialogFragment() {
-    private val mainViewModel: MainViewModel by viewModels()
-
 
     companion object {
         var macAddress: String? = null
@@ -55,5 +53,4 @@ class BluetoothDeviceDialogFragment() : BottomSheetDialogFragment() {
             }
         })
     }
-
 }
