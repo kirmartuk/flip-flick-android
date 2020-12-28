@@ -21,6 +21,10 @@ class BluetoothRepository(private val context: Context) {
 
         const val UPDATE_HOSTS = "com.martyuk.flipflick.BluetoothRepository.UPDATE_HOSTS"
 
+        /**
+         * Get battery lebel of Bluetooth device
+         * @return Int - battery level from 0 to 100 if can't get battery level then return -1
+         */
         fun BluetoothDevice.getBatteryLevel() =
             this.let { bluetoothDevice ->
                 (bluetoothDevice.javaClass.getMethod("getBatteryLevel"))
@@ -33,7 +37,7 @@ class BluetoothRepository(private val context: Context) {
      * @param liveData with ArrayList of BluetoothDevice
      * @return update lifeData after receiving data from ServiceListener
      */
-    fun getConnectedBluetoothDevices(liveData: MutableLiveData<ArrayList<BluetoothDevice>>) {
+    fun getConnectedBluetoothDevices(liveData: MutableLiveData<ArrayList<BluetoothDeviceWithConnectionStatus>>) {
         var list: ArrayList<BluetoothDevice>
         val serviceListener: BluetoothProfile.ServiceListener = object :
             BluetoothProfile.ServiceListener {
@@ -43,13 +47,21 @@ class BluetoothRepository(private val context: Context) {
 
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile?) {
                 list = proxy?.connectedDevices as ArrayList<BluetoothDevice>
-                liveData.postValue(list)
+                liveData.postValue(
+                    ArrayList(
+                        liveData.value!!.map {
+                            BluetoothDeviceWithConnectionStatus(
+                                it.bluetoothDevice in list,
+                                it.bluetoothDevice
+                            )
+                        }
+                    ).sortDevicesByStatus()
+                )
                 Log.e("connected", list.toString())
                 BluetoothAdapter.getDefaultAdapter().closeProfileProxy(profile, proxy)
-
             }
-
         }
+
         BluetoothAdapter.getDefaultAdapter()
             .getProfileProxy(
                 context,
@@ -112,11 +124,6 @@ class BluetoothRepository(private val context: Context) {
 
     }
 
-
-    private fun List<BluetoothDeviceWithConnectionStatus>.sortDevicesByStatus() =
-        this.sortedByDescending { device -> device.status }
-
-
     /**
      * Reconnect bluetooth device to the host
      * @param bluetoothDevice - BluetoothDevice
@@ -132,16 +139,7 @@ class BluetoothRepository(private val context: Context) {
         )
     }
 
-    fun mergeAllAndConnectedDevices(
-        allDevices: ArrayList<BluetoothDevice>,
-        connectedDevices: ArrayList<BluetoothDevice>
-    ): ArrayList<BluetoothDeviceWithConnectionStatus> {
+    private fun List<BluetoothDeviceWithConnectionStatus>.sortDevicesByStatus() =
+        ArrayList<BluetoothDeviceWithConnectionStatus>(this.sortedByDescending { device -> device.status })
 
-        return ArrayList(allDevices.map { bluetoothDevice ->
-            BluetoothDeviceWithConnectionStatus(
-                bluetoothDevice in connectedDevices,
-                bluetoothDevice
-            )
-        }.sortDevicesByStatus())
-    }
 }
