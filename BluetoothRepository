@@ -1,0 +1,30 @@
+import pydbus
+import os
+
+
+class BluetoothRepository:
+    @classmethod
+    def get_connected_devices(cls):
+        connected_devices = list()
+
+        bus = pydbus.SystemBus()
+        adapter = bus.get('org.bluez', '/org/bluez/hci0')
+        manager = bus.get('org.bluez', '/')
+        managed_objects = manager.GetManagedObjects()
+
+        for path in managed_objects:
+            connection_state = managed_objects[path].get('org.bluez.Device1', {}).get('Connected', False)
+            if connection_state:
+                print(managed_objects[path].get('org.bluez.Device1', {}))
+                mac_address = managed_objects[path].get('org.bluez.Device1', {}).get('Address')
+                name = managed_objects[path].get('org.bluez.Device1', {}).get('Name')
+                connected_devices.append({"name": name, "address": mac_address})
+        return connected_devices
+
+    @classmethod
+    def connect_to_device(cls, bluetooth_device_mac_address):
+        os.system('bluetoothctl connect ' + bluetooth_device_mac_address)
+
+    @classmethod
+    def disconnect_device(cls, bluetooth_device_mac_address):
+        os.system('bluetoothctl disconnect ' + bluetooth_device_mac_address)
