@@ -14,3 +14,6 @@ Dark Mode             |  Light Mode
 Dark Mode             |  Light Mode
 :-------------------------:|:-------------------------:
 ![](https://github.com/kirmartuk/flip-flick-android/blob/main/screenshots/reconnect_device_to_connected_host.png)  |  ![](https://github.com/kirmartuk/flip-flick-android/blob/main/screenshots/reconnect_device_to_connected_host_light.png)
+
+# Linux server
+run linux_bluetooth_server.py
